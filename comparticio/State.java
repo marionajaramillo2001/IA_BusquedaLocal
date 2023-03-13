@@ -1,10 +1,9 @@
 package comparticio;
 import IA.Comparticion.*;
+import aima.search.framework.Successor;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class State {
     Usuarios usuaris;
@@ -17,10 +16,11 @@ public class State {
         generaSolucioInicial1();
     }
 
-    public State(State copia)
+    public State(State copy)
     {
-        usuaris = copia.usuaris;
-        assignacioCoductors = new HashMap<>(copia.assignacioCoductors);
+        usuaris = copy.usuaris;
+        assignacioCoductors = (HashMap<Usuario, Path>)copy.assignacioCoductors.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> new Path(e.getValue())));
     }
 
     private void generaSolucioInicial1()
@@ -82,9 +82,9 @@ public class State {
             }
 
             Action recull = new Action(Action.DriverAction.RECULL, pas,
-                    Util.getOrigen(pas), );
+                    Util.getOrigen(pas), 1);
             Action deixa = new Action(Action.DriverAction.DEIXA, pas,
-                    Util.getDesti(pas), );
+                    Util.getDesti(pas), 0);
 
             trajecteEscollit.distancia += minDistIncrease;
             trajecteEscollit.trajecte.add(trajecteEscollit.trajecte.size() - 1, recull);
@@ -109,16 +109,21 @@ public class State {
         return assignacioCoductors.size();
     }
 
-    public void swapPassengers(ArrayList<State> states)
+    public void swapPassengers(ArrayList<Successor> states)
     {
         for (Map.Entry<Usuario, Path> set : assignacioCoductors.entrySet()) {
+            Usuario driver = (Usuario)set.getKey();
             Path traj = set.getValue();
             for (int i = 1; i < traj.trajecte.size() - 2; ++i)
             {
                 if (traj.canSwap(i))
                 {
+                    Action a1 = traj.trajecte.get(i);
+                    Action a2 = traj.trajecte.get(i + 1);
+                    String act = "Swapping " + a1.toString() + " with " +
+                            a2.toString() + " in driver " + driver.toString();
                     traj.swap(i);
-                    states.add(new State(this));
+                    states.add(new Successor(act, new State(this)));
                     traj.swap(i);
                 }
             }

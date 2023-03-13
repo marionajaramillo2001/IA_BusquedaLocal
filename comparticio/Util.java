@@ -14,6 +14,12 @@ public class Util {
             this.x = x;
             this.y = y;
         }
+
+        @Override
+        public String toString()
+        {
+            return "(" + x + ", " + y + ")";
+        }
     }
 
     public static int dist(int x1, int y1, int x2, int y2)
