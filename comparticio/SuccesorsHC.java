@@ -1,15 +1,14 @@
 package comparticio;
 
-import IA.Comparticion.*;
-
 import aima.search.framework.SuccessorFunction;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ComparticioSuccessorFunction implements SuccessorFunction {
+public class SuccesorsHC implements SuccessorFunction {
+    @Override
     public List getSuccessors(Object state) {
-        ComparticioEstat estat = (ComparticioEstat) state;
+        State estat = (State) state;
         List successors = new ArrayList();
 
         return successors;

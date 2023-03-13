@@ -2,11 +2,11 @@ package comparticio;
 
 import java.util.ArrayList;
 
-public class ComparticioTrajecte {
-    public ArrayList<ComparticioAccio> trajecte;
+public class Path {
+    public ArrayList<Action> trajecte;
     public int distancia;
 
-    public ComparticioTrajecte()
+    public Path()
     {
         trajecte = new ArrayList<>();
     }
@@ -15,11 +15,11 @@ public class ComparticioTrajecte {
     {
         distancia = 0;
         if (trajecte.size() < 2) return;
-        Util.Pos prev = trajecte.get(0).posicio;
+        Util.Pos prev = trajecte.get(0).position;
 
         for (int i = 1; i < trajecte.size(); ++i)
         {
-            Util.Pos next = trajecte.get(i).posicio;
+            Util.Pos next = trajecte.get(i).position;
             distancia += Util.dist(prev, next);
             prev = next;
         }

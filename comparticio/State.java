@@ -5,18 +5,18 @@ import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ComparticioEstat {
+public class State {
     Usuarios usuaris;
-    HashMap<Usuario, ComparticioTrajecte> assignacioCoductors;
+    HashMap<Usuario, Path> assignacioCoductors;
 
-    public ComparticioEstat(Usuarios users)
+    public State(Usuarios users)
     {
         usuaris = users;
         assignacioCoductors = new HashMap<>();
         generaSolucioInicial1();
     }
 
-    public ComparticioEstat(ComparticioEstat copia)
+    public State(State copia)
     {
         usuaris = copia.usuaris;
         assignacioCoductors = new HashMap<>(copia.assignacioCoductors);
@@ -30,9 +30,9 @@ public class ComparticioEstat {
         for (Usuario u : usuaris)
         {
             if (u.isConductor()) {
-                ComparticioTrajecte ct = new ComparticioTrajecte();
-                ct.trajecte.add(new ComparticioAccio(Accio.RECULL, u, Util.getOrigen(u)));
-                ct.trajecte.add(new ComparticioAccio(Accio.DEIXA, u, Util.getDesti(u)));
+                Path ct = new Path();
+                ct.trajecte.add(new Action(Action.DriverAction.RECULL, u, Util.getOrigen(u)));
+                ct.trajecte.add(new Action(Action.DriverAction.DEIXA, u, Util.getDesti(u)));
                 ct.calculaDistancia();
                 assignacioCoductors.put(u, ct);
             }
@@ -44,16 +44,18 @@ public class ComparticioEstat {
             Usuario pas = passatgers.getFirst();
             int pasDist = Util.dist(Util.getOrigen(pas), Util.getDesti(pas));
             int minDistIncrease = Integer.MAX_VALUE;
-            ComparticioTrajecte trajecteEscollit = null;
+            Path trajecteEscollit = null;
 
-            for (Map.Entry<Usuario, ComparticioTrajecte> set : assignacioCoductors.entrySet())
+            for (Map.Entry<Usuario, Path> set : assignacioCoductors.entrySet())
             {
                 Usuario cond = set.getKey();
-                ComparticioTrajecte traj = set.getValue();
+                Path traj = set.getValue();
 
                 // Intentem recullir i deixar al final
-                Util.Pos lastPos = traj.trajecte.get(traj.trajecte.size() - 1).posicio;
-                Util.Pos prevPos = traj.trajecte.get(traj.trajecte.size() - 2).posicio;
+                Util.Pos lastPos =
+                        traj.trajecte.get(traj.trajecte.size() - 1).position;
+                Util.Pos prevPos =
+                        traj.trajecte.get(traj.trajecte.size() - 2).position;
 
                 int dist = traj.distancia - Util.dist(lastPos, prevPos) +
                         Util.dist(prevPos, Util.getOrigen(pas)) + pasDist;
@@ -76,8 +78,8 @@ public class ComparticioEstat {
                 return;
             }
 
-            ComparticioAccio recull = new ComparticioAccio(Accio.RECULL, pas, Util.getOrigen(pas));
-            ComparticioAccio deixa = new ComparticioAccio(Accio.DEIXA, pas, Util.getDesti(pas));
+            Action recull = new Action(Action.DriverAction.RECULL, pas, Util.getOrigen(pas));
+            Action deixa = new Action(Action.DriverAction.DEIXA, pas, Util.getDesti(pas));
 
             trajecteEscollit.distancia += minDistIncrease;
             trajecteEscollit.trajecte.add(trajecteEscollit.trajecte.size() - 1, recull);
@@ -87,18 +89,33 @@ public class ComparticioEstat {
         }
     }
 
+    public int getTotalDistance() {
+        int dist = 0;
+
+        for (Map.Entry<Usuario, Path> set : assignacioCoductors.entrySet()) {
+            Path traj = set.getValue();
+            dist += traj.distancia;
+        }
+
+        return dist;
+    }
+
+    public int getDrivers() {
+        return assignacioCoductors.size();
+    }
+
     public void print()
     {
-        for (Map.Entry<Usuario, ComparticioTrajecte> set : assignacioCoductors.entrySet()) {
+        for (Map.Entry<Usuario, Path> set : assignacioCoductors.entrySet()) {
             Usuario cond = set.getKey();
-            ComparticioTrajecte traj = set.getValue();
+            Path traj = set.getValue();
 
             System.out.println("Conductor " + cond.toString() + ", distancia " + traj.distancia);
 
-            for (ComparticioAccio accio : traj.trajecte)
+            for (Action accio : traj.trajecte)
             {
-                System.out.println(accio.accio + " passatger " + accio.usuari.toString() + " a la posició (" +
-                        accio.posicio.x + ", " + accio.posicio.y + ")");
+                System.out.println(accio.action + " passatger " + accio.user.toString() + " a la posició (" +
+                        accio.position.x + ", " + accio.position.y + ")");
             }
 
             System.out.println();
