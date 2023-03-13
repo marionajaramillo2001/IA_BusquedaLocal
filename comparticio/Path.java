@@ -11,6 +11,24 @@ public class Path {
         trajecte = new ArrayList<>();
     }
 
+    public boolean canSwap(int i)
+    {
+        Action a1 = trajecte.get(i);
+        Action a2 = trajecte.get(i + 1);
+
+        if (a1.action == Action.DriverAction.DEIXA && a2.action == Action.DriverAction.RECULL)
+            return a1.npassengers == 0;
+        else if (a1.action == Action.DriverAction.RECULL && a2.action == Action.DriverAction.DEIXA)
+            return a1.npassengers == 2;
+        else
+            return true;
+    }
+
+    public void swap(int i)
+    {
+
+    }
+
     public void calculaDistancia()
     {
         distancia = 0;

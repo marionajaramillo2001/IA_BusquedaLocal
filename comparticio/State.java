@@ -1,6 +1,7 @@
 package comparticio;
 import IA.Comparticion.*;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,8 +32,10 @@ public class State {
         {
             if (u.isConductor()) {
                 Path ct = new Path();
-                ct.trajecte.add(new Action(Action.DriverAction.RECULL, u, Util.getOrigen(u)));
-                ct.trajecte.add(new Action(Action.DriverAction.DEIXA, u, Util.getDesti(u)));
+                ct.trajecte.add(new Action(Action.DriverAction.RECULL, u,
+                        Util.getOrigen(u), 0));
+                ct.trajecte.add(new Action(Action.DriverAction.DEIXA, u,
+                        Util.getDesti(u), 0));
                 ct.calculaDistancia();
                 assignacioCoductors.put(u, ct);
             }
@@ -78,8 +81,10 @@ public class State {
                 return;
             }
 
-            Action recull = new Action(Action.DriverAction.RECULL, pas, Util.getOrigen(pas));
-            Action deixa = new Action(Action.DriverAction.DEIXA, pas, Util.getDesti(pas));
+            Action recull = new Action(Action.DriverAction.RECULL, pas,
+                    Util.getOrigen(pas), );
+            Action deixa = new Action(Action.DriverAction.DEIXA, pas,
+                    Util.getDesti(pas), );
 
             trajecteEscollit.distancia += minDistIncrease;
             trajecteEscollit.trajecte.add(trajecteEscollit.trajecte.size() - 1, recull);
@@ -102,6 +107,22 @@ public class State {
 
     public int getDrivers() {
         return assignacioCoductors.size();
+    }
+
+    public void swapPassengers(ArrayList<State> states)
+    {
+        for (Map.Entry<Usuario, Path> set : assignacioCoductors.entrySet()) {
+            Path traj = set.getValue();
+            for (int i = 1; i < traj.trajecte.size() - 2; ++i)
+            {
+                if (traj.canSwap(i))
+                {
+                    traj.swap(i);
+                    states.add(new State(this));
+                    traj.swap(i);
+                }
+            }
+        }
     }
 
     public void print()

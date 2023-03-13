@@ -7,9 +7,12 @@ import java.util.List;
 
 public class SuccesorsHC implements SuccessorFunction {
     @Override
-    public List getSuccessors(Object state) {
-        State estat = (State) state;
-        List successors = new ArrayList();
+    public List<State> getSuccessors(Object state) {
+        State s = (State) state;
+        ArrayList<State> successors = new ArrayList<>();
+
+        // Operadors de girs dins un mateix cotxe
+        s.swapPassengers(successors);
 
         return successors;
     }
