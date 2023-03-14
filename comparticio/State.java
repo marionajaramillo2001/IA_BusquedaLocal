@@ -65,7 +65,8 @@ public class State {
                         traj.trajecte.get(traj.trajecte.size() - 2).position;
 
                 int dist = traj.distancia - Util.dist(lastPos, prevPos) +
-                        Util.dist(prevPos, Util.getOrigen(pas)) + pasDist;
+                        Util.dist(prevPos, Util.getOrigen(pas)) + pasDist +
+                        Util.dist(Util.getDesti(pas),lastPos);
 
                 double time = 0.1 * (double)dist / 30.0;
 
@@ -136,55 +137,59 @@ public class State {
     }
 
     public void unassignAloneDriver(ArrayList<Successor> states) {
-        for (Map.Entry<Usuario, Path> possibleAloneDriver :
-                assignacioConductors.entrySet()) {
+        Iterator<Map.Entry<Usuario, Path> >
+                iterator = assignacioConductors.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Usuario, Path> possibleAloneDriver = iterator.next();
+
             Path trajPossibleAloneDriver = possibleAloneDriver.getValue();
-            if (trajPossibleAloneDriver.trajecte.size() == 0) {
+            if (trajPossibleAloneDriver.trajecte.size() == 2) {
                 Usuario driver = (Usuario)possibleAloneDriver.getKey();
-                int pasDist = Util.dist(Util.getOrigen(driver),
+                int driverDist = Util.dist(Util.getOrigen(driver),
                         Util.getDesti(driver));
                 int minDistIncrease = Integer.MAX_VALUE;
                 Path trajecteEscollit = null;
                 Usuario conductorTrajecteEscollit = null;
+                for (Map.Entry<Usuario, Path> set :
+                        assignacioConductors.entrySet()) {
+                    if (set.getKey() != driver) {
+                        Path traj = set.getValue();
 
-                for (Map.Entry<Usuario, Path> set : assignacioConductors.entrySet())
-                {
-                    Path traj = set.getValue();
+                        // Intentem recollir i deixar al final
+                        Util.Pos lastPos =
+                                traj.trajecte.get(traj.trajecte.size() - 1).position;
+                        Util.Pos prevPos =
+                                traj.trajecte.get(traj.trajecte.size() - 2).position;
 
-                    // Intentem recollir i deixar al final
-                    Util.Pos lastPos =
-                            traj.trajecte.get(traj.trajecte.size() - 1).position;
-                    Util.Pos prevPos =
-                            traj.trajecte.get(traj.trajecte.size() - 2).position;
+                        int dist = traj.distancia - Util.dist(lastPos, prevPos) +
+                                Util.dist(prevPos, Util.getOrigen(driver)) + driverDist +
+                                Util.dist(Util.getDesti(driver), lastPos);
 
-                    int dist = traj.distancia - Util.dist(lastPos, prevPos) +
-                            Util.dist(prevPos, Util.getOrigen(driver)) + pasDist;
-
-                    double time = 0.1 * (double)dist / 30.0;
-
-                    if (time <= 1.0)
-                    {
-                        if (dist - traj.distancia < minDistIncrease)
-                        {
-                            minDistIncrease = dist - traj.distancia;
-                            trajecteEscollit = traj;
-                            conductorTrajecteEscollit = set.getKey();
+                        double time = 0.1 * (double) dist / 30.0;
+                        if (time <= 1.0) {
+                            if (dist - traj.distancia < minDistIncrease) {
+                                minDistIncrease = dist - traj.distancia;
+                                trajecteEscollit = traj;
+                                conductorTrajecteEscollit = set.getKey();
+                            }
                         }
                     }
                 }
+                System.out.println(assignacioConductors.size());
 
                 if (trajecteEscollit != null) {
-                    Action recull = new Action(Action.DriverAction.RECULL, driver,
+                    Action recull =
+                            new Action(Action.DriverAction.RECULL, driver,
                             Util.getOrigen(driver), 1);
                     Action deixa = new Action(Action.DriverAction.DEIXA, driver,
                             Util.getDesti(driver), 0);
                     trajecteEscollit.distancia += minDistIncrease;
                     trajecteEscollit.trajecte.add(trajecteEscollit.trajecte.size() - 1, recull);
                     trajecteEscollit.trajecte.add(trajecteEscollit.trajecte.size() - 1, deixa);
-                    assignacioConductors.remove(conductorTrajecteEscollit);
+                    iterator.remove();
                     String act =
                             "Unassigning alone driver" + driver.toString() +
-                            " and assigning it to driver " + conductorTrajecteEscollit.toString();
+                                    " and assigning it to driver " + conductorTrajecteEscollit.toString();
                     states.add(new Successor(act, new State(this)));
                 }
             }
