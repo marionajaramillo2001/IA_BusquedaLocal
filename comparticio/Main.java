@@ -18,7 +18,7 @@ public class Main {
     }
 
     public static void main(String[] args){
-        Usuarios users = new Usuarios(100, 50, 435);
+        Usuarios users = new Usuarios(200, 100, 1234);
         State initialState = new State(users);
 
         System.out.println("Initial solution");
@@ -31,8 +31,6 @@ public class Main {
             System.out.println("Solution found with hill climbing");
             System.out.println("Path distance: " + res.getTotalDistance());
             System.out.println("Drivers: " + res.getDrivers());
-
-
         } catch (Exception e) {
             System.out.println(e);
             e.printStackTrace();
