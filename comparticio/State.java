@@ -3,24 +3,26 @@ import IA.Comparticion.*;
 import aima.search.framework.Successor;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class State {
     Usuarios usuaris;
-    HashMap<Usuario, Path> assignacioConductors;
+    ConcurrentHashMap<Usuario, Path> assignacioConductors;
 
     public State(Usuarios users)
     {
         usuaris = users;
-        assignacioConductors = new HashMap<>();
+        assignacioConductors = new ConcurrentHashMap<>();
         generaSolucioInicial1();
     }
 
     public State(State copy)
     {
         usuaris = copy.usuaris;
-        assignacioConductors = (HashMap<Usuario, Path>)copy.assignacioConductors.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> new Path(e.getValue())));
+        assignacioConductors = (ConcurrentHashMap<Usuario, Path>)copy.assignacioConductors.entrySet().stream()
+                .collect(Collectors.toConcurrentMap(Map.Entry::getKey,
+            e -> new Path(e.getValue())));
     }
 
     private void generaSolucioInicial1()
@@ -106,7 +108,6 @@ public class State {
             Path traj = set.getValue();
             dist += traj.distancia;
         }
-
         return dist;
     }
 
@@ -142,9 +143,10 @@ public class State {
         while (iterator.hasNext()) {
             Map.Entry<Usuario, Path> possibleAloneDriver = iterator.next();
 
-            Path trajPossibleAloneDriver = possibleAloneDriver.getValue();
+            Usuario driver = (Usuario)possibleAloneDriver.getKey();
+            Path trajPossibleAloneDriver =
+                    new Path(possibleAloneDriver.getValue());
             if (trajPossibleAloneDriver.trajecte.size() == 2) {
-                Usuario driver = (Usuario)possibleAloneDriver.getKey();
                 int driverDist = Util.dist(Util.getOrigen(driver),
                         Util.getDesti(driver));
                 int minDistIncrease = Integer.MAX_VALUE;
@@ -175,7 +177,6 @@ public class State {
                         }
                     }
                 }
-                System.out.println(assignacioConductors.size());
 
                 if (trajecteEscollit != null) {
                     Action recull =
@@ -191,6 +192,10 @@ public class State {
                             "Unassigning alone driver" + driver.toString() +
                                     " and assigning it to driver " + conductorTrajecteEscollit.toString();
                     states.add(new Successor(act, new State(this)));
+                    assignacioConductors.put(driver, trajPossibleAloneDriver);
+                    trajecteEscollit.distancia -= minDistIncrease;
+                    trajecteEscollit.trajecte.remove(trajecteEscollit.trajecte.size()-1);
+                    trajecteEscollit.trajecte.remove(trajecteEscollit.trajecte.size()-1);
                 }
             }
         }

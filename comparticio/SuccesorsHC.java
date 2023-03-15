@@ -15,6 +15,7 @@ public class SuccesorsHC implements SuccessorFunction {
         // Operadors de girs dins un mateix cotxe
         s.swapPassengers(successors);
         s.unassignAloneDriver(successors);
+        //System.out.println(s.getTotalDistance());
 
         return successors;
     }
