@@ -181,8 +181,8 @@ public class State {
                     Path newtrajecte = newstate.assignacioConductors.get(conductorTrajecteEscollit);
 
                     newtrajecte.distancia += minDistIncrease;
-                    newtrajecte.trajecte.add(trajecteEscollit.trajecte.size() - 2, recull);
-                    newtrajecte.trajecte.add(trajecteEscollit.trajecte.size() - 2, deixa);
+                    newtrajecte.trajecte.add(newtrajecte.trajecte.size() - 2, recull);
+                    newtrajecte.trajecte.add(newtrajecte.trajecte.size() - 2, deixa);
 
                     newstate.assignacioConductors.remove(driver);
 
