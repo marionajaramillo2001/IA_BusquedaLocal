@@ -185,8 +185,8 @@ public class State {
                     Action deixa = new Action(Action.DriverAction.DEIXA, driver,
                             Util.getDesti(driver), 0);
                     trajecteEscollit.distancia += minDistIncrease;
-                    trajecteEscollit.trajecte.add(trajecteEscollit.trajecte.size() - 1, recull);
-                    trajecteEscollit.trajecte.add(trajecteEscollit.trajecte.size() - 1, deixa);
+                    trajecteEscollit.trajecte.add(trajecteEscollit.trajecte.size() - 2, recull);
+                    trajecteEscollit.trajecte.add(trajecteEscollit.trajecte.size() - 2, deixa);
                     iterator.remove();
                     String act =
                             "Unassigning alone driver" + driver.toString() +
@@ -194,8 +194,8 @@ public class State {
                     states.add(new Successor(act, new State(this)));
                     assignacioConductors.put(driver, trajPossibleAloneDriver);
                     trajecteEscollit.distancia -= minDistIncrease;
-                    trajecteEscollit.trajecte.remove(trajecteEscollit.trajecte.size()-1);
-                    trajecteEscollit.trajecte.remove(trajecteEscollit.trajecte.size()-1);
+                    trajecteEscollit.trajecte.remove(trajecteEscollit.trajecte.size()-2);
+                    trajecteEscollit.trajecte.remove(trajecteEscollit.trajecte.size()-2);
                 }
             }
         }
