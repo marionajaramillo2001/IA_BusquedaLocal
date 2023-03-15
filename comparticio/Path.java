@@ -78,4 +78,25 @@ public class Path {
             prev = next;
         }
     }
+
+    public void remove(int i) {
+        Action a0 = trajecte.get(i - 1);
+        Action a1 = trajecte.get(i);
+        Action a2 = trajecte.get(i + 1);
+
+        int distDiff = Util.dist(a0.position, a2.position) - Util.dist(a0.position, a1.position) - Util.dist(a1.position, a2.position);
+
+        trajecte.remove(i);
+        distancia += distDiff;
+    }
+
+    public void add(int i, Action a) {
+        Action a0 = trajecte.get(i - 1);
+        Action a1 = trajecte.get(i);
+
+        int distDiff = Util.dist(a0.position, a.position) + Util.dist(a.position, a1.position) - Util.dist(a0.position, a1.position);
+
+        trajecte.add(i, a);
+        distancia += distDiff;
+    }
 }

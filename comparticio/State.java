@@ -1,6 +1,7 @@
 package comparticio;
 import IA.Comparticion.*;
 import aima.search.framework.Successor;
+import aima.util.Pair;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -189,6 +190,69 @@ public class State {
                     String act = "Unassigning alone driver" + driver.toString() +
                                     " and assigning it to driver " + conductorTrajecteEscollit.toString();
                     states.add(new Successor(act, newstate));
+                }
+            }
+        }
+    }
+
+    public void mourePassatgers(ArrayList<Successor> states) {
+        for (Map.Entry<Usuario, Path> set : assignacioConductors.entrySet()) {
+            Usuario conductor = set.getKey();
+            Path ruta =set.getValue();
+            HashMap<Usuario, Integer> usuarisRecullPos = new HashMap<>();
+            HashMap<Usuario, Integer> usuarisDeixaPos = new HashMap<>();
+            for (int i = 1; i <= ruta.trajecte.size() - 2; ++i) {
+                Action act = ruta.trajecte.get(i);
+                Usuario u = act.user;
+                if (act.action == Action.DriverAction.RECULL) usuarisRecullPos.put(u,i);
+                else if (act.action == Action.DriverAction.DEIXA) usuarisDeixaPos.put(u,i);
+            }
+
+            for (Map.Entry<Usuario, Path> set2 : assignacioConductors.entrySet()) {
+                Usuario conductor2 = set2.getKey();
+                Path ruta2 = set2.getValue();
+
+                if (conductor2 != conductor) {
+                    for(Map.Entry<Usuario, Integer> set3 : usuarisRecullPos.entrySet()) {
+
+                        Usuario passatger = set3.getKey();
+                        int posRecullTrajecteIni =  usuarisRecullPos.get(passatger);
+                        int posDeixaTrajecteIni = usuarisDeixaPos.get(passatger);
+                        Action accioRecullTrajecteIni = ruta.trajecte.get(posRecullTrajecteIni);
+                        Action accioDeixaTrajecteIni = ruta.trajecte.get(posDeixaTrajecteIni);
+
+                        int distPassatger = Util.dist(Util.getOrigen(passatger), Util.getDesti(passatger));
+
+                        Util.Pos lastPos =
+                                ruta2.trajecte.get(ruta2.trajecte.size() - 1).position;
+                        Util.Pos prevPos =
+                                ruta2.trajecte.get(ruta2.trajecte.size() - 2).position;
+
+                        int dist = ruta2.distancia - Util.dist(lastPos, prevPos) +
+                                Util.dist(prevPos, Util.getOrigen(passatger)) + distPassatger +
+                                Util.dist(Util.getDesti(passatger), lastPos);
+
+                        double time = 0.1 * (double) dist / 30.0;
+                        if (time <= 1.0) {
+                            Action recull = new Action(
+                                    Action.DriverAction.RECULL, passatger, Util.getOrigen(passatger), 1);
+                            Action deixa = new Action(
+                                    Action.DriverAction.DEIXA, passatger, Util.getDesti(passatger), 0);
+
+                            ruta2.add(ruta2.trajecte.size() - 1, recull);
+                            ruta2.add(ruta2.trajecte.size() - 1, deixa);
+                            ruta.remove(posRecullTrajecteIni);
+                            ruta.remove(posDeixaTrajecteIni-1);
+                            String act = "Unassigning passsanger " + passatger.toString() + " from driver " +
+                                    conductor.toString() + " and assigning it to driver " + conductor2.toString();
+                            states.add(new Successor(act, new State(this)));
+                            //System.out.println(this.getTotalDistance());
+                            ruta2.remove(ruta2.trajecte.size() - 2);
+                            ruta2.remove(ruta2.trajecte.size() - 2);
+                            ruta.add(posRecullTrajecteIni, accioRecullTrajecteIni);
+                            ruta.add(posDeixaTrajecteIni, accioDeixaTrajecteIni);
+                        }
+                    }
                 }
             }
         }
