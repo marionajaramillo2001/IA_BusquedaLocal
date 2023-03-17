@@ -11,11 +11,13 @@ public class State {
     Usuarios usuaris;
     HashMap<Usuario, Path> assignacioConductors;
 
-    public State(Usuarios users)
+    public State(Usuarios users, int ini)
     {
         usuaris = users;
         assignacioConductors = new HashMap<>();
-        generaSolucioInicial1();
+
+        if (ini == 1) generaSolucioInicial1();
+        else if (ini == 2) generaSolucioInicial2();
     }
 
     public State(State copy)
@@ -36,10 +38,8 @@ public class State {
                 Path ct = new Path();
                 // Action s'inicialitza amb npassengers a 0 perquè no són
                 // passatgers, són conductors
-                ct.trajecte.add(new Action(Action.DriverAction.RECULL, u,
-                        Util.getOrigen(u), 0));
-                ct.trajecte.add(new Action(Action.DriverAction.DEIXA, u,
-                        Util.getDesti(u), 0));
+                ct.trajecte.add(new Action(Action.DriverAction.RECULL, u, Util.getOrigen(u), 0));
+                ct.trajecte.add(new Action(Action.DriverAction.DEIXA, u, Util.getDesti(u), -1));
                 ct.calculaDistancia();
                 assignacioConductors.put(u, ct); // cada conductor genera un
                 // path (o assignació de passatgers a conductors associada al
@@ -61,10 +61,8 @@ public class State {
                 Path traj = set.getValue();
 
                 // Intentem recollir i deixar al final
-                Util.Pos lastPos =
-                        traj.trajecte.get(traj.trajecte.size() - 1).position;
-                Util.Pos prevPos =
-                        traj.trajecte.get(traj.trajecte.size() - 2).position;
+                Util.Pos lastPos = traj.trajecte.get(traj.trajecte.size() - 1).position;
+                Util.Pos prevPos = traj.trajecte.get(traj.trajecte.size() - 2).position;
 
                 int dist = traj.distancia - Util.dist(lastPos, prevPos) +
                         Util.dist(prevPos, Util.getOrigen(pas)) + pasDist +
@@ -96,6 +94,105 @@ public class State {
             trajecteEscollit.distancia += minDistIncrease;
             trajecteEscollit.trajecte.add(trajecteEscollit.trajecte.size() - 1, recull);
             trajecteEscollit.trajecte.add(trajecteEscollit.trajecte.size() - 1, deixa);
+
+            passatgers.removeFirst();
+        }
+    }
+
+    private void generaSolucioInicial2()
+    {
+        // Genera solucio inicial on assigna cada passatger sense cotxe a un conductor
+        LinkedList<Usuario> passatgers = new LinkedList<>();
+
+        for (Usuario u : usuaris)
+        {
+            if (u.isConductor()) {
+                Path ct = new Path();
+                // Action s'inicialitza amb npassengers a 0 perquè no són
+                // passatgers, són conductors
+                ct.trajecte.add(new Action(Action.DriverAction.RECULL, u, Util.getOrigen(u), 0));
+                ct.trajecte.add(new Action(Action.DriverAction.DEIXA, u, Util.getDesti(u), -1));
+                ct.calculaDistancia();
+                assignacioConductors.put(u, ct); // cada conductor genera un
+                // path (o assignació de passatgers a conductors associada al
+                // path)
+            }
+            else passatgers.add(u);
+        }
+
+        while (!passatgers.isEmpty())
+        {
+            Usuario pas = passatgers.getFirst();
+            Util.Pos porigin = Util.getOrigen(pas);
+            Util.Pos pdestiny = Util.getDesti(pas);
+            int minDistIncrease = Integer.MAX_VALUE;
+            Path trajecteEscollit = null;
+            int recullPos = -1;
+            int deixaPos = -1;
+
+            for (Map.Entry<Usuario, Path> set : assignacioConductors.entrySet())
+            {
+                Usuario cond = set.getKey();
+                Path traj = set.getValue();
+
+                // Probem tots els llocs possibles on recollir/deixar
+                for (int i = 1; i < traj.trajecte.size(); ++i)
+                {
+                   Action sprev = traj.trajecte.get(i - 1);
+                   Action snext = traj.trajecte.get(i);
+
+                   for (int j = i; j < traj.trajecte.size(); ++j)
+                   {
+                       Action eprev = traj.trajecte.get(j - 1);
+                       Action enext = traj.trajecte.get(j);
+                       if (eprev.npassengers == 2) break;
+
+                       int distInc = 0;
+
+                       if (i == j)
+                           distInc = Util.dist(porigin, pdestiny) + Util.dist(sprev.position, porigin)
+                                   + Util.dist(snext.position, pdestiny) - Util.dist(sprev.position, snext.position);
+                       else
+                           distInc = Util.dist(sprev.position, porigin) + Util.dist(porigin, snext.position)
+                                   - Util.dist(sprev.position, snext.position) + Util.dist(eprev.position, pdestiny)
+                                   + Util.dist(pdestiny, enext.position) - Util.dist(eprev.position, enext.position);
+
+                       int dist = traj.distancia + distInc;
+
+                       double time = 0.1 * (double)dist / 30.0;
+
+                       if (time <= 1.0)
+                       {
+                           if (dist - traj.distancia < minDistIncrease)
+                           {
+                               minDistIncrease = distInc;
+                               trajecteEscollit = traj;
+                               recullPos = i;
+                               deixaPos = j;
+                           }
+                       }
+                   }
+                }
+            }
+
+            if (trajecteEscollit == null)
+            {
+                System.out.println("No hem pogut assignar el passatger " + pas);
+                return;
+            }
+
+            Action sprev = trajecteEscollit.trajecte.get(recullPos - 1);
+            Action eprev = trajecteEscollit.trajecte.get(deixaPos - 1);
+
+            Action recull = new Action(Action.DriverAction.RECULL, pas, Util.getOrigen(pas), sprev.npassengers + 1);
+            Action deixa = new Action(Action.DriverAction.DEIXA, pas, Util.getDesti(pas), eprev.npassengers);
+
+            for (int i = recullPos; i < deixaPos; ++i)
+                ++trajecteEscollit.trajecte.get(i).npassengers;
+
+            trajecteEscollit.distancia += minDistIncrease;
+            trajecteEscollit.trajecte.add(deixaPos, deixa);
+            trajecteEscollit.trajecte.add(recullPos, recull);
 
             passatgers.removeFirst();
         }

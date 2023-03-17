@@ -18,22 +18,27 @@ public class Main {
     }
 
     public static void main(String[] args){
-        Usuarios users = new Usuarios(200, 100, 1234);
-        State initialState = new State(users);
+        Usuarios users = new Usuarios(100, 50, 1234);
 
-        System.out.println("Initial solution");
-        System.out.println("Path distance: " + initialState.getTotalDistance());
-        System.out.println("Drivers: " + initialState.getDrivers());
-        System.out.println();
+        for (int i = 1; i <= 2; ++i) {
+            State initialState = new State(users, i);
 
-        try {
-            State res = executeHillClimbing(initialState);
-            System.out.println("Solution found with hill climbing");
-            System.out.println("Path distance: " + res.getTotalDistance());
-            System.out.println("Drivers: " + res.getDrivers());
-        } catch (Exception e) {
-            System.out.println(e);
-            e.printStackTrace();
+            System.out.println("Initial solution " + i);
+            System.out.println("Path distance: " + initialState.getTotalDistance());
+            System.out.println("Drivers: " + initialState.getDrivers());
+            System.out.println();
+
+            try {
+                State res = executeHillClimbing(initialState);
+                System.out.println("Solution found with hill climbing");
+                System.out.println("Path distance: " + res.getTotalDistance());
+                System.out.println("Drivers: " + res.getDrivers());
+            } catch (Exception e) {
+                System.out.println(e);
+                e.printStackTrace();
+            }
+
+            System.out.println();
         }
     }
 }
