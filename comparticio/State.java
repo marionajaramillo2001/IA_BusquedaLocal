@@ -239,22 +239,19 @@ public class State {
                                     Action deixa = new Action(
                                             Action.DriverAction.DEIXA, passatger, Util.getDesti(passatger), ruta2.trajecte.get(i).npassengers);
 
-                                    Path rutaCopia = new Path(ruta);
-                                    Path ruta2Copia = new Path(ruta2);
-
-                                    ruta2.add(i, deixa);
-                                    ruta2.add(i, recull);
-                                    ruta.remove(posRecullTrajecteIni);
-                                    ruta.remove(posDeixaTrajecteIni - 1);
+                                    State newState = new State(this);
+                                    Path newRuta =
+                                            newState.assignacioConductors.get(conductor);
+                                    Path newRuta2 =
+                                            newState.assignacioConductors.get(conductor2);
+                                    newRuta2.add(i, deixa);
+                                    newRuta2.add(i, recull);
+                                    newRuta.remove(posRecullTrajecteIni);
+                                    newRuta.remove(posDeixaTrajecteIni - 1);
                                     String act = "Unassigning passsanger " + passatger.toString() + " from driver " +
                                             conductor.toString() + " and assigning it to driver " + conductor2.toString();
-                                    State newState = new State(this);
-                                    newState.assignacioConductors.put(conductor, ruta);
-                                    newState.assignacioConductors.put(conductor2, ruta2);
-                                    states.add(new Successor(act, newState));
 
-                                    ruta = rutaCopia;
-                                    ruta2 = ruta2Copia;
+                                    states.add(new Successor(act, newState));
                                 }
                             }
                         }
