@@ -18,7 +18,7 @@ public class Main {
     }
 
     public static void main(String[] args){
-        Usuarios users = new Usuarios(100, 50, 1234);
+        Usuarios users = new Usuarios(200, 100, 1234);
 
         for (int i = 1; i <= 2; ++i) {
             State initialState = new State(users, i);
@@ -29,8 +29,13 @@ public class Main {
             System.out.println();
 
             try {
+                long startTime = System.nanoTime();
                 State res = executeHillClimbing(initialState);
+                long endTime = System.nanoTime();
+                long duration = endTime - startTime;
+
                 System.out.println("Solution found with hill climbing");
+                System.out.println("Time taken: " + (duration/1000000));
                 System.out.println("Path distance: " + res.getTotalDistance());
                 System.out.println("Drivers: " + res.getDrivers());
             } catch (Exception e) {
