@@ -18,7 +18,7 @@ public class Main {
     }
 
     public static void main(String[] args){
-        Usuarios users = new Usuarios(200, 100, 1234);
+        Usuarios users = new Usuarios(200, 1, 1234);
 
         for (int i = 1; i <= 2; ++i) {
             State initialState = new State(users, i);

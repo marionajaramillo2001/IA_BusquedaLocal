@@ -55,6 +55,11 @@ public class State {
             int minDistIncrease = Integer.MAX_VALUE;
             Path trajecteEscollit = null;
 
+            double maxtime = 1.0;
+            double increaseOutOftime = Double.MAX_VALUE;
+            Path trajecteForaTemps = null;
+            int distForaTemps = 0;
+
             for (Map.Entry<Usuario, Path> set : assignacioConductors.entrySet())
             {
                 Usuario cond = set.getKey();
@@ -78,12 +83,27 @@ public class State {
                         trajecteEscollit = traj;
                     }
                 }
+                else
+                {
+                    maxtime = Math.max(maxtime, time);
+                    double distIncrease = maxtime - 1.0 + dist - traj.distancia;
+                    if (distIncrease < increaseOutOftime)
+                    {
+                        increaseOutOftime = distIncrease;
+                        distForaTemps = dist - traj.distancia;
+                        trajecteForaTemps = traj;
+                    }
+                }
             }
 
-            if (trajecteEscollit == null)
+            if (trajecteEscollit == null )
             {
-                System.out.println("No hem pogut assignar el passatger " + pas);
-                return;
+                trajecteEscollit = trajecteForaTemps;
+                minDistIncrease = distForaTemps;
+                if (trajecteEscollit == null) {
+                    System.out.println("No hem pogut assignar el passatger " + pas);
+                    return;
+                }
             }
 
             Action recull = new Action(Action.DriverAction.RECULL, pas,
@@ -130,6 +150,13 @@ public class State {
             int recullPos = -1;
             int deixaPos = -1;
 
+            double maxtime = 1.0;
+            double increaseOutOftime = Double.MAX_VALUE;
+            Path trajecteForaTemps = null;
+            int distForaTemps = 0;
+            int recullForaTemps = -1;
+            int deixaForaTemps = -1;
+
             for (Map.Entry<Usuario, Path> set : assignacioConductors.entrySet())
             {
                 Usuario cond = set.getKey();
@@ -171,14 +198,33 @@ public class State {
                                deixaPos = j;
                            }
                        }
+                       else
+                       {
+                           maxtime = Math.max(maxtime, time);
+                           double distIncrease = maxtime - 1.0 + dist - traj.distancia;
+                           if (distIncrease < increaseOutOftime)
+                           {
+                               increaseOutOftime = distIncrease;
+                               distForaTemps = dist - traj.distancia;
+                               trajecteForaTemps = traj;
+                               recullForaTemps = i;
+                               deixaForaTemps = j;
+                           }
+                       }
                    }
                 }
             }
 
-            if (trajecteEscollit == null)
+            if (trajecteEscollit == null )
             {
-                System.out.println("No hem pogut assignar el passatger " + pas);
-                return;
+                trajecteEscollit = trajecteForaTemps;
+                minDistIncrease = distForaTemps;
+                recullPos = recullForaTemps;
+                deixaPos = deixaForaTemps;
+                if (trajecteEscollit == null) {
+                    System.out.println("No hem pogut assignar el passatger " + pas);
+                    return;
+                }
             }
 
             Action sprev = trajecteEscollit.trajecte.get(recullPos - 1);

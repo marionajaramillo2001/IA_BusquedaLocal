@@ -5,7 +5,13 @@ import aima.search.framework.HeuristicFunction;
 
 import java.util.Map;
 
-public class Heuristic implements HeuristicFunction {
+public class Heuristic2 implements HeuristicFunction {
+
+    private final State initialState;
+
+    public Heuristic2(State initialState) {
+        this.initialState = initialState;
+    }
 
     @Override
     public double getHeuristicValue(Object state) {
@@ -20,6 +26,6 @@ public class Heuristic implements HeuristicFunction {
         if ((double)maxlen * 0.1 / 30 > 1.0)
             scale = 2;
 
-        return scale * s.getTotalDistance();
+        return scale * (s.getTotalDistance() + s.getDrivers() * initialState.getTotalDistance() / initialState.getDrivers());
     }
 }
