@@ -28,39 +28,23 @@ def get_ops(lineNum):
             list = f.readlines()
             line = list[lineNum]
             op = float(line.split(": ")[1])
-            sol = float(list[1].split(':')[1])
-            if sol == iniSol:
-                dataAux.append(op)
-            else:
-                ops.append(sum(dataAux)/len(dataAux))
-                dataAux = [op]
-            iniSol = sol
+            dataAux.append(op)
         ops.append(sum(dataAux)/len(dataAux))
     return ops
 
 def plot_data():
-    adds = get_ops(-8)
-    print(len(adds))
-    print(adds)
-    erases = get_ops(-7)
-    moves = get_ops(-6)
-    swaps = get_ops(-5)
+    unassign = get_ops(-1)
+    moves = get_ops(-2)
+    swaps = get_ops(-3)
 
-    langs = ['Orden de llegada', 'Uniforme garantizados',
-            'Uniforme todos', 'Ordenados por consumo',
-            'Garantizados por distancia']
+    langs = ['h0']
 
     fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=langs,
-        y=adds,
-        name='Add',
-        marker_color='indianred'
-    ))
+
 
     fig.add_trace(go.Bar(
         x=langs,
-        y=erases,
+        y=unassign,
         name='Remove',
         marker_color='lightsalmon'
     ))
@@ -107,8 +91,8 @@ def execute(path, nusuaris, ndrivers, seed, heuristica, solIni,
 
 def execute_experiment1(path):
     for n in range(10):
-        seed = random.randint(0, 2**32 - 1)
-        outputFile = "outputs/0_" + str(n) + ".txt"
+        seed = random.randint(0, 2**31 - 1)
+        outputFile = "outputs/0_0_" + str(n) + ".txt"
         execute(path, 200, 100, seed, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, outputFile)
 
 def create_folder(folder_name):
