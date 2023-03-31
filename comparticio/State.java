@@ -16,8 +16,8 @@ public class State {
         usuaris = users;
         assignacioConductors = new HashMap<>();
 
-        if (ini == 1) generaSolucioInicial1();
-        else if (ini == 2) generaSolucioInicial2();
+        if (ini == 0) generaSolucioInicial1();
+        else if (ini == 1) generaSolucioInicial2();
     }
 
     public State(State copy)
@@ -271,8 +271,7 @@ public class State {
                     Action a2 = traj.trajecte.get(i + 1);
                     State newstate = new State(this);
                     newstate.assignacioConductors.get(driver).swap(i);
-                    String act = "Swapping " + a1.toString() + " with " +
-                            a2.toString() + " in driver " + driver.toString();
+                    String act = "S";
                     states.add(new Successor(act, newstate));
                 }
             }
@@ -330,8 +329,7 @@ public class State {
 
                     newstate.assignacioConductors.remove(driver);
 
-                    String act = "Unassigning alone driver" + driver.toString() +
-                                    " and assigning it to driver " + conductorTrajecteEscollit.toString();
+                    String act = "U";
                     states.add(new Successor(act, newstate));
                 }
             }
@@ -391,8 +389,7 @@ public class State {
                                     newRuta2.add(i, recull);
                                     newRuta.remove(posRecullTrajecteIni);
                                     newRuta.remove(posDeixaTrajecteIni - 1);
-                                    String act = "Unassigning passsanger " + passatger.toString() + " from driver " +
-                                            conductor.toString() + " and assigning it to driver " + conductor2.toString();
+                                    String act = "M";
 
                                     states.add(new Successor(act, newState));
                                 }
