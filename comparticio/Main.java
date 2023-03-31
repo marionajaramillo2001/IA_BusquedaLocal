@@ -14,23 +14,23 @@ public class Main {
     public static void main(String[] args){
         // Parametres: nusuaris ndrivers seed heuristica solIni
         // hill_annealing steps stiter k lambda
-        // imprimirAccions imprimirRes
+        // imprimirAccions imprimirRes imprimirIni
 
-        assert(args.length == 14);
+        assert(args.length == 13);
 
-        int nusuaris = Integer.parseInt(args[1]);
-        int ndrivers =  Integer.parseInt(args[2]);
-        int seed =  Integer.parseInt(args[3]);
-        int heuristica =  Integer.parseInt(args[4]);
-        int solIni =  Integer.parseInt(args[5]);
-        int hill_annealing =  Integer.parseInt(args[6]);
-        int steps = Integer.parseInt(args[7]);
-        int stiter =  Integer.parseInt(args[8]);
-        int k =  Integer.parseInt(args[9]);
-        double lambda = Double.parseDouble(args[10]);
-        boolean imprimirAccions = Integer.parseInt(args[11]) != 0;
-        boolean imprimirRes = Integer.parseInt(args[12]) != 0;
-        boolean imprimirIni = Integer.parseInt(args[13]) != 0;
+        int nusuaris = Integer.parseInt(args[0]);
+        int ndrivers =  Integer.parseInt(args[1]);
+        int seed =  Integer.parseInt(args[2]);
+        int heuristica =  Integer.parseInt(args[3]);
+        int solIni =  Integer.parseInt(args[4]);
+        int hill_annealing =  Integer.parseInt(args[5]);
+        int steps = Integer.parseInt(args[6]);
+        int stiter =  Integer.parseInt(args[7]);
+        int k =  Integer.parseInt(args[8]);
+        double lambda = Double.parseDouble(args[9]);
+        boolean imprimirAccions = Integer.parseInt(args[10]) != 0;
+        boolean imprimirRes = Integer.parseInt(args[11]) != 0;
+        boolean imprimirIni = Integer.parseInt(args[12]) != 0;
 
         Usuarios users = new Usuarios(nusuaris, ndrivers, seed);
         State initialState = new State(users, solIni);
