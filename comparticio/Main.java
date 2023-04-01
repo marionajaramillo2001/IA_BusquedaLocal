@@ -1,6 +1,7 @@
 
 package comparticio;
 
+import IA.Comparticion.Usuario;
 import IA.Comparticion.Usuarios;
 import aima.search.framework.HeuristicFunction;
 import aima.search.framework.Problem;
@@ -8,6 +9,8 @@ import aima.search.framework.Search;
 import aima.search.framework.SearchAgent;
 import aima.search.informed.HillClimbingSearch;
 import aima.search.informed.SimulatedAnnealingSearch;
+
+import java.util.Map;
 
 public class Main {
 
@@ -76,7 +79,18 @@ public class Main {
             }
 
             if (imprimirRes) {
-                System.out.println("Solution found");
+
+                int maxdist = 0;
+
+                for (Map.Entry<Usuario, Path> e : goal.assignacioConductors.entrySet())
+                    maxdist = Math.max(maxdist, e.getValue().distancia);
+
+                double t = 0.1 * (double)maxdist / 30.0;
+
+                if (t > 1.0) System.out.print("Solution not found, ");
+                else System.out.print("Solution found, ");
+                System.out.println("t = " + t);
+
                 System.out.println("Time taken: " + (duration / 1000000));
                 System.out.println("Path distance: " + goal.getTotalDistance());
                 System.out.println("Drivers: " + goal.getDrivers());
