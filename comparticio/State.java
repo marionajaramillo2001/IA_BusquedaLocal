@@ -286,51 +286,37 @@ public class State {
 
             if (trajPossibleAloneDriver.trajecte.size() == 2) {
                 int driverDist = Util.dist(Util.getOrigen(driver), Util.getDesti(driver));
-                int minDistIncrease = Integer.MAX_VALUE;
-                Path trajecteEscollit = null;
-                Usuario conductorTrajecteEscollit = null;
+
                 for (Map.Entry<Usuario, Path> set : assignacioConductors.entrySet()) {
-                    if (set.getKey() != driver) {
+                    Usuario nextDriver = set.getKey();
+                    if (nextDriver != driver) {
                         Path traj = set.getValue();
 
                         // Intentem recollir i deixar al final
-                        Util.Pos lastPos =
-                                traj.trajecte.get(traj.trajecte.size() - 1).position;
-                        Util.Pos prevPos =
-                                traj.trajecte.get(traj.trajecte.size() - 2).position;
+                        Util.Pos lastPos = traj.trajecte.get(traj.trajecte.size() - 1).position;
+                        Util.Pos prevPos = traj.trajecte.get(traj.trajecte.size() - 2).position;
 
                         int dist = traj.distancia - Util.dist(lastPos, prevPos) +
                                 Util.dist(prevPos, Util.getOrigen(driver)) + driverDist +
                                 Util.dist(Util.getDesti(driver), lastPos);
 
-                        double time = 0.1 * (double) dist / 30.0;
-                        if (time <= 1.0) {
-                            if (dist - traj.distancia < minDistIncrease) {
-                                minDistIncrease = dist - traj.distancia;
-                                trajecteEscollit = traj;
-                                conductorTrajecteEscollit = set.getKey();
-                            }
-                        }
+                        Action recull = new Action(Action.DriverAction.RECULL, driver,
+                                Util.getOrigen(driver), 1);
+                        Action deixa = new Action(Action.DriverAction.DEIXA, driver,
+                                Util.getDesti(driver), 0);
+
+                        State newstate = new State(this);
+                        Path newtrajecte = newstate.assignacioConductors.get(nextDriver);
+
+                        newtrajecte.distancia = dist;
+                        newtrajecte.trajecte.add(newtrajecte.trajecte.size() - 1, recull);
+                        newtrajecte.trajecte.add(newtrajecte.trajecte.size() - 1, deixa);
+
+                        newstate.assignacioConductors.remove(driver);
+
+                        String act = "U";
+                        states.add(new Successor(act, newstate));
                     }
-                }
-
-                if (trajecteEscollit != null) {
-                    Action recull = new Action(Action.DriverAction.RECULL, driver,
-                            Util.getOrigen(driver), 1);
-                    Action deixa = new Action(Action.DriverAction.DEIXA, driver,
-                            Util.getDesti(driver), 0);
-
-                    State newstate = new State(this);
-                    Path newtrajecte = newstate.assignacioConductors.get(conductorTrajecteEscollit);
-
-                    newtrajecte.distancia += minDistIncrease;
-                    newtrajecte.trajecte.add(newtrajecte.trajecte.size() - 1, recull);
-                    newtrajecte.trajecte.add(newtrajecte.trajecte.size() - 1, deixa);
-
-                    newstate.assignacioConductors.remove(driver);
-
-                    String act = "U";
-                    states.add(new Successor(act, newstate));
                 }
             }
         }
@@ -339,19 +325,20 @@ public class State {
     public void mourePassatgers(ArrayList<Successor> states) {
         for (Map.Entry<Usuario, Path> set : assignacioConductors.entrySet()) {
             Usuario conductor = set.getKey();
-            Path ruta = new Path(set.getValue());
+            Path ruta = set.getValue();
             HashMap<Usuario, Integer> usuarisRecullPos = new HashMap<>();
             HashMap<Usuario, Integer> usuarisDeixaPos = new HashMap<>();
+
             for (int i = 1; i <= ruta.trajecte.size() - 2; ++i) {
                 Action act = ruta.trajecte.get(i);
                 Usuario u = act.user;
-                if (act.action == Action.DriverAction.RECULL) usuarisRecullPos.put(u,i);
-                else if (act.action == Action.DriverAction.DEIXA) usuarisDeixaPos.put(u,i);
+                if (act.action == Action.DriverAction.RECULL) usuarisRecullPos.put(u, i);
+                else if (act.action == Action.DriverAction.DEIXA) usuarisDeixaPos.put(u, i);
             }
 
             for (Map.Entry<Usuario, Path> set2 : assignacioConductors.entrySet()) {
                 Usuario conductor2 = set2.getKey();
-                Path ruta2 = new Path(set2.getValue());
+                Path ruta2 = set2.getValue();
 
                 if (conductor2 != conductor) {
                     for(Map.Entry<Usuario, Integer> set3 : usuarisRecullPos.entrySet()) {
@@ -363,36 +350,29 @@ public class State {
                         int distPassatger = Util.dist(Util.getOrigen(passatger), Util.getDesti(passatger));
 
                         for (int i = 1; i <= ruta2.trajecte.size() - 2; ++i) {
-                            if (ruta2.trajecte.get(i).npassengers < 2) {
-                                Util.Pos curPos =
-                                        ruta2.trajecte.get(i).position;
-                                Util.Pos prevPos =
-                                        ruta2.trajecte.get(i - 1).position;
+                            if (ruta2.trajecte.get(i - 1).npassengers < 2) {
+                                Util.Pos curPos = ruta2.trajecte.get(i).position;
+                                Util.Pos prevPos = ruta2.trajecte.get(i - 1).position;
 
-                                int dist = ruta2.distancia - Util.dist(curPos, prevPos) +
-                                        Util.dist(prevPos, Util.getOrigen(passatger)) + distPassatger +
-                                        Util.dist(Util.getDesti(passatger), curPos);
+                                Action recull = new Action(
+                                        Action.DriverAction.RECULL, passatger, Util.getOrigen(passatger), ruta2.trajecte.get(i - 1).npassengers + 1);
+                                Action deixa = new Action(
+                                        Action.DriverAction.DEIXA, passatger, Util.getDesti(passatger), ruta2.trajecte.get(i - 1).npassengers);
 
-                                double time = 0.1 * (double) dist / 30.0;
-                                if (time <= 1.0) {
-                                    Action recull = new Action(
-                                            Action.DriverAction.RECULL, passatger, Util.getOrigen(passatger), ruta2.trajecte.get(i).npassengers + 1);
-                                    Action deixa = new Action(
-                                            Action.DriverAction.DEIXA, passatger, Util.getDesti(passatger), ruta2.trajecte.get(i).npassengers);
+                                State newState = new State(this);
+                                Path newRuta = newState.assignacioConductors.get(conductor);
+                                Path newRuta2 = newState.assignacioConductors.get(conductor2);
+                                newRuta2.add(i, deixa);
+                                newRuta2.add(i, recull);
 
-                                    State newState = new State(this);
-                                    Path newRuta =
-                                            newState.assignacioConductors.get(conductor);
-                                    Path newRuta2 =
-                                            newState.assignacioConductors.get(conductor2);
-                                    newRuta2.add(i, deixa);
-                                    newRuta2.add(i, recull);
-                                    newRuta.remove(posRecullTrajecteIni);
-                                    newRuta.remove(posDeixaTrajecteIni - 1);
-                                    String act = "M";
+                                for (int j = posRecullTrajecteIni + 1; j < posDeixaTrajecteIni; ++j)
+                                    --newRuta.trajecte.get(j).npassengers;
 
-                                    states.add(new Successor(act, newState));
-                                }
+                                newRuta.remove(posDeixaTrajecteIni);
+                                newRuta.remove(posRecullTrajecteIni);
+                                String act = "M";
+
+                                states.add(new Successor(act, newState));
                             }
                         }
                     }

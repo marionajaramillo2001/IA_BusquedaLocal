@@ -28,7 +28,7 @@ public class Path {
         if (a1.action == Action.DriverAction.DEIXA && a2.action == Action.DriverAction.RECULL)
             return a1.npassengers == 0;
         else if (a1.action == Action.DriverAction.RECULL && a2.action == Action.DriverAction.DEIXA)
-            return a1.npassengers == 2;
+            return a1.npassengers == 2 && a1.user != a2.user;
         else
             return true;
     }
