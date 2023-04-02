@@ -177,6 +177,7 @@ def plot_data4(r):
 def plot_data5():
     time = [get_ops(1, "outputs/exp5/" + str(i)) for i in range(2)]
     dist = [get_ops(2, "outputs/exp5/" + str(i)) for i in range(2)]
+    drivers = [get_ops(3, "outputs/exp5/" + str(i)) for i in range(2)]
 
     langs = ['Heurística 0', 'Heurística 1']
 
@@ -196,10 +197,18 @@ def plot_data5():
         marker_color='lightslategray'
     ))
 
+    fig.add_trace(go.Bar(
+        x=langs,
+        y=drivers,
+        name='Drivers',
+        marker_color='rgb(69,117,180)'
+    ))
+
     # Here we modify the tickangle of the xaxis, resulting in rotated labels.
     fig.update_layout(barmode='group', xaxis_tickangle=-45, title_text="Resultat")
     fig.show()
-    fig.write_image("plots/exp5.png")
+    fig.write_image("plots/exp5-2.png")
+
     
 def plot_data6():
     time = [get_ops(1, "outputs/exp6/" + str(i)) for i in range(2)]
@@ -245,7 +254,7 @@ def execute(path, nusuaris, ndrivers, seed, heuristica, solIni,
     optImprimirRes = " " + str(imprimirRes) + " "
     optImprimirIni = " " + str(imprimirIni) + " "
     opts = optNUsuaris + optNDrivers + optSeed + optHeuristica + optSolIni + optHillAnnealing + optSteps + optStiter + optK + optLambda + optImprimirAccions + optImprimirRes + optImprimirIni
-    command = "java -jar -Xmx1000m " + "\"" + path + "\" " + opts + "> " + outputFile
+    command = "java -jar -Xmx10000m " + "\"" + path + "\" " + opts + "> " + outputFile
     print(command)
     os.system(command)
 
@@ -277,7 +286,7 @@ def execute_experiment3(path):
             for lambd in lambdas:
                 for stiter in stiters:
                     outputFile = "outputs/exp3/" + str(stiter) + "_" + str(k) + "_" + str(lambd) + "-" + str(n) + ".txt"
-                    execute(path, 200, 100, seed, heur, solIni, 1, steps, stiter, k, lambd, 0, 1, 0, outputFile)
+                    execute(path, 50, 25, seed, heur, solIni, 1, steps, stiter, k, lambd, 0, 1, 0, outputFile)
                     
 def execute_experiment4(path, r):
     heur = 0
@@ -303,9 +312,9 @@ def execute_experiment6(path):
     # parameters obtained in experiment 3
     solIni = 1
     steps = 1000
-    stiter = 10
+    stiter = 60
     k = 1
-    lambd = 0.0001
+    lambd = 0.00001
     for h in range(2):
         create_folder(r"outputs/exp6/" + str(h))
         for i in range(10):
@@ -350,15 +359,15 @@ if __name__ == "__main__":
         
     if exp == 4 or exp == 0:
         # experiment 4
-        r = range(200, 1100, 100)
+        r = range(200, 600, 100)
         create_folder(r"outputs/exp4")
-        execute_experiment4(args.path, r)
+        #execute_experiment4(args.path, r)
         plot_data4(r)
 
     if exp == 5 or exp == 0:
         # experiment 5
         create_folder(r"outputs/exp5")
-        execute_experiment5(args.path)
+        #execute_experiment5(args.path)
         plot_data5()
         
     if exp == 6 or exp == 0:
