@@ -1,12 +1,8 @@
 # Projecte Compartición IA
+
 Primer projecte IA FIB
+Enunciat a PracticaPlanificacion.pdf
 
 Mariona Jaramillo
 Francesc Pifarré
 Rubén Aciego
-
-mariona.jaramillo@estudiantat.upc.edu
-
-francesc.pifarre@estudiantat.upc.edu
-
-ruben.aciego@estudiantat.upc.edu
